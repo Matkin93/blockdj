@@ -1,21 +1,9 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
-
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
-import MapView, { Polygon } from 'react-native-maps';
-
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import { StyleSheet, Text, View, Linking } from 'react-native';
+import AreaModal from './components/AreaModal';
+import Login from './components/Login';
+import SpotifyAuth from './components/SpotifyAuth';
+import Map from './components/Map';
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -23,15 +11,15 @@ export default class App extends Component<Props> {
     super(props);
     this.state = {
       currentUser: {
-
+        hasChosenSpotifyOption: false
       },
       currentLocation: {
-        latitude: 37.78825,
-        longitude: -122.4324,
+        latitude: 53.486196968335136,
+        longitude: -2.2359145558205,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       },
-      inAnArea: true,
+      inAnArea: false,
       currentArea: { name: "Northern Quarter" },
       areaPlaylists: [
         { name: '' }
@@ -68,15 +56,97 @@ export default class App extends Component<Props> {
           areaColor: 'rgba(142,249,243,0.3)',
           areaBorderColor: 'rgba(142,249,243,1)'
         }
-      ]
+      ],
+      isLoggedIn: false
     }
+
+    // setInterval(() => {
+    //   navigator.geolocation.watchPosition(
+    //     (position) => {
+    //       this.setState({
+    //         currentLocation: {
+    //           latitude: position.coords.latitude,
+    //           longitude: position.coords.longitude,
+    //           latitudeDelta: 0.0322,
+    //           longitudeDelta: 0.0421,
+    //           error: null,
+    //         }
+    //       });
+    //     },
+    //     (error) => this.setState({ error: error.message }),
+    //     { enableHighAccuracy: true, maximumAge: 1000, distanceFilter: 1 },
+    //   );
+    // }, 1000);
+  }
+
+
+  spotifyAuth() {
+    Linking.openURL('http://localhost:8888')
+      .then(() => {
+        this.setState({
+          currentUser: {
+            hasChosenSpotifyOption: true
+          }
+        })
+      })
+  }
+
+  noSpotifyAuth() {
+    this.setState({
+      currentUser: {
+        hasChosenSpotifyOption: true
+      }
+    })
+  }
+
+  login() {
+    //api call to either create or get user info
+    //.then( * setState with recieved userData)
+    //if user has logged into spotify before set hasChosedSpotifyOption to true
+    this.setState({
+      loggedIn: true
+    })
+  }
+
+  componentDidMount() {
+    this.watchID = navigator.geolocation.watchPosition(
+      (position) => {
+        this.setState({
+          currentLocation: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            latitudeDelta: 0.0322,
+            longitudeDelta: 0.0421,
+            error: null,
+          }
+        });
+      },
+      (error) => this.setState({ error: error.message }),
+      { enableHighAccuracy: true, maximumAge: 1000, distanceFilter: 1 },
+    );
+
+    console.log('Hello')
+  }
+
+  componentWillUnmount() {
+    navigator.geolocation.clearWatch(this.watchID);
   }
 
   render() {
-    return (
+    if (!this.state.loggedIn) return (
+      <Login styles={styles} login={() => this.login()} />
+    )
+    else if (!this.state.currentUser.hasChosenSpotifyOption) return (
+      <SpotifyAuth styles={styles} spotifyAuth={() => this.spotifyAuth()} noSpotifyAuth={() => this.noSpotifyAuth()} />
+    )
+    else return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <MapView style={styles.map} showsUserLocation />
+        <View>
+          <Text style={styles.title}>Block DJ</Text>
+        </View>
+        <Map styles={styles} currentLocation={this.state.currentLocation} areas={this.state.areas} />
+        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} />}
+        {!this.state.inAnArea && <Text style={styles.noAreaMsg}>Make your way to area to see their playlists</Text>}
       </View>
     );
   }
@@ -85,22 +155,59 @@ export default class App extends Component<Props> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#171738',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    justifyContent: 'center',
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  authContainer: {
+    flex: 1,
+    backgroundColor: '#171738',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
   },
   map: {
-    width: 500,
-    height: 500
+    height: 550,
+    width: 500
+  },
+  title: {
+    marginTop: 20,
+    fontSize: 20,
+    color: 'white',
+  },
+  welcomeMsg: {
+    color: 'white'
+  },
+  areaCallout: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  areaCalloutDescription: {
+    margin: 5
+  },
+  areaCalloutName: {
+    fontSize: 17,
+    marginBottom: 3
+  },
+  login: {
+    padding: 10,
+  },
+  loginButton: {
+    backgroundColor: 'green',
+    borderRadius: 10,
+    margin: 10
+  },
+  loginTitle: {
+    fontSize: 40,
+    color: 'white',
+    marginTop: 40
+  },
+  loginMsg: {
+    fontSize: 15,
+    color: 'white'
+  },
+  noAreaMsg: {
+    color: 'white',
+    marginTop: 10
   }
 });
