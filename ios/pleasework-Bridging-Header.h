@@ -11,5 +11,4 @@
 #ifndef pleasework_Bridging_Header_h
 #define pleasework_Bridging_Header_h
 
-
 #endif /* pleasework_Bridging_Header_h */

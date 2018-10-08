@@ -6,7 +6,7 @@ const Login = ({
 }) => (
     <View style={styles.container}>
       <Text style={styles.loginTitle}>
-        Welcome to Block DJ
+        Block DJ
       </Text>
       <Text style={styles.loginMsg}>
         Login to become to the Top DJ of your area!

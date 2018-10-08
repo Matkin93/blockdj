@@ -7,16 +7,18 @@ const componentName = ({
 }) => (
     <MapView style={styles.map}
       showsUserLocation
-      region={currentLocation} >
+      initialRegion={currentLocation} >
       {areas.map((area, i) => {
         return <View key={i}>
           <Polygon
-            coordinates={area.coordinates}
+            coordinates={area.bounds}
             fillColor={area.areaColor}
             strokeWidth={2}
             strokeColor='#171738'
           />
-          <Marker coordinate={area.coordinates[0]} pinColor='#171738'>
+          <Marker coordinate={area.markerLocation} pinColor='#171738'
+            image='/Users/matthewatkin/Northcoders/app-test/pleasework/assets/images/vinyl.png'
+          >
             <Callout style={styles.areaCallout}>
               <Text style={styles.areaCalloutName}>{area.name}</Text>
               <Text style={styles.areaCalloutDescription}>{area.description}</Text>

@@ -4,6 +4,8 @@ import AreaModal from './components/AreaModal';
 import Login from './components/Login';
 import SpotifyAuth from './components/SpotifyAuth';
 import Map from './components/Map';
+import inside from 'point-in-polygon';
+import * as api from './api';
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -11,72 +13,20 @@ export default class App extends Component<Props> {
     super(props);
     this.state = {
       currentUser: {
+        username: 'Matthew Atkin',
+        points: 200,
         hasChosenSpotifyOption: false
       },
-      currentLocation: {
-        latitude: 53.486196968335136,
-        longitude: -2.2359145558205,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      },
+      currentLocation: {},
       inAnArea: false,
-      currentArea: { name: "Northern Quarter" },
-      areaPlaylists: [
-        { name: '' }
-      ],
-      areas: [
-        {
-          coordinates: [
-            { latitude: 53.486196968335136, longitude: -2.2359145558205 },
-            { latitude: 53.481518879521516, longitude: -2.227015072296922 },
-            { latitude: 53.48186415564243, longitude: -2.230208644603522 },
-            { latitude: 53.48157614811416, longitude: -2.231231865247196 },
-            { latitude: 53.480873844102014, longitude: -2.2306954234442173 },
-            { latitude: 53.48029901524724, longitude: -2.2324561665915326 },
-            { latitude: 53.48123373546192, longitude: -2.2334539890289307 },
-            { latitude: 53.482121, longitude: -2.237719 },
-            { latitude: 53.481955, longitude: -2.238277 },
-            { latitude: 53.482223, longitude: -2.239435, },
-            { latitude: 53.484751, longitude: -2.238727 },
-          ],
-          name: 'Northern Quarter',
-          description: 'Hipster place in Manchester',
-          areaColor: 'rgba(219,84,97,0.3)',
-          areaBorderColor: 'rgba(219,84,97,1)'
-        },
-        {
-          coordinates: [
-            { latitude: 53.485695, longitude: -2.239615, },
-            { latitude: 53.486208, longitude: -2.241167, },
-            { latitude: 53.486773, longitude: -2.240859 },
-            { latitude: 53.486248, longitude: -2.239273 },
-          ],
-          name: 'Northcoders',
-          description: 'Hip-happening place full of cool people',
-          areaColor: 'rgba(142,249,243,0.3)',
-          areaBorderColor: 'rgba(142,249,243,1)'
-        }
-      ],
-      isLoggedIn: false
+      currentArea: {},
+      playlists: [],
+      userPlaylists: [],
+      areas: [],
+      isLoggedIn: false,
+      currentCity: {},
+      isInCity: false
     }
-
-    // setInterval(() => {
-    //   navigator.geolocation.watchPosition(
-    //     (position) => {
-    //       this.setState({
-    //         currentLocation: {
-    //           latitude: position.coords.latitude,
-    //           longitude: position.coords.longitude,
-    //           latitudeDelta: 0.0322,
-    //           longitudeDelta: 0.0421,
-    //           error: null,
-    //         }
-    //       });
-    //     },
-    //     (error) => this.setState({ error: error.message }),
-    //     { enableHighAccuracy: true, maximumAge: 1000, distanceFilter: 1 },
-    //   );
-    // }, 1000);
   }
 
 
@@ -108,6 +58,66 @@ export default class App extends Component<Props> {
     })
   }
 
+  initialiseChecks() {
+    setInterval(() => {
+      if (this.state.isInCity) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const posArr = [position.coords.latitude, position.coords.longitude];
+          const cityArr = this.state.currentCity.coordinates.map(coord => [coord.latitude, coord.longitude]);
+          if (!inside(posArr, cityArr)) {
+            this.setState({
+              currentArea: {},
+              inAnArea: false,
+              areas: [],
+              currentCity: {},
+              isInCity: false
+            });
+            api.checkAreaAndFetchPlaylists(`lat=${position.coords.latitude}&long=${position.coords.longitude}`, this.state.currentCity._id)
+              .then(playlistDocs => {
+                const { playlists, area } = playlistDocs.data
+                this.setState({
+                  playlists,
+                  currentArea: area,
+                  inAnArea: true
+                })
+              })
+              .catch(console.log)
+          }
+        })
+      }
+      else {
+        navigator.geolocation.getCurrentPosition(position => {
+          api.checkCityAndFetchAreas(`${position.coords.latitude}&${position.coords.longitude}`)
+            .then(areasDocs => {
+              const { areas, city } = areasDocs.data;
+              this.setState({
+                areas,
+                currentCity: city,
+                isInCity: true
+              })
+              return city
+            })
+            .then((city) => {
+              if (this.state.isInCity) {
+                api.checkAreaAndFetchPlaylists(`lat=${position.coords.latitude}&long=${position.coords.longitude}`, city._id)
+                  .then(playlistDocs => {
+                    const { playlists, area } = playlistDocs.data
+                    this.setState({
+                      playlists,
+                      currentArea: area,
+                      inAnArea: true
+                    })
+
+                  })
+                  .catch(console.log)
+              }
+            })
+            .catch(console.log)
+        })
+      }
+    }, 30000)
+  }
+
   componentDidMount() {
     this.watchID = navigator.geolocation.watchPosition(
       (position) => {
@@ -115,17 +125,42 @@ export default class App extends Component<Props> {
           currentLocation: {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-            latitudeDelta: 0.0322,
-            longitudeDelta: 0.0421,
+            latitudeDelta: 0.0222,
+            longitudeDelta: 0.0321,
             error: null,
           }
         });
+        api.checkCityAndFetchAreas(`${position.coords.latitude}&${position.coords.longitude}`)
+          .then(areasDocs => {
+            const { areas, city } = areasDocs.data;
+            this.setState({
+              areas,
+              currentCity: city,
+              isInCity: true
+            })
+            return city
+          })
+          .then((city) => {
+            if (this.state.isInCity) {
+              api.checkAreaAndFetchPlaylists(`lat=${position.coords.latitude}&long=${position.coords.longitude}`, city._id)
+                .then(playlistDocs => {
+                  const { playlists, area } = playlistDocs.data
+                  this.setState({
+                    playlists,
+                    currentArea: area,
+                    inAnArea: true
+                  })
+
+                })
+                .catch(console.log)
+            }
+          })
+          .catch(console.log)
       },
       (error) => this.setState({ error: error.message }),
       { enableHighAccuracy: true, maximumAge: 1000, distanceFilter: 1 },
-    );
-
-    console.log('Hello')
+    )
+    this.initialiseChecks();
   }
 
   componentWillUnmount() {
@@ -145,8 +180,8 @@ export default class App extends Component<Props> {
           <Text style={styles.title}>Block DJ</Text>
         </View>
         <Map styles={styles} currentLocation={this.state.currentLocation} areas={this.state.areas} />
-        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} />}
-        {!this.state.inAnArea && <Text style={styles.noAreaMsg}>Make your way to area to see their playlists</Text>}
+        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} areas={this.state.areas} playlists={this.state.playlists} />}
+        {!this.state.inAnArea && <Text style={styles.noAreaMsg}>Make your way to an area to see playlists</Text>}
       </View>
     );
   }
@@ -181,6 +216,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    maxWidth: 250
   },
   areaCalloutDescription: {
     margin: 5

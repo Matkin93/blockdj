@@ -5,7 +5,7 @@ const SpotifyAuth = ({
   styles, spotifyAuth, noSpotifyAuth
 }) => (
     <View style={styles.authContainer}>
-      <Text style={styles.loginMsg}>To complete and post playlists you will need to login with spotify, click the button below to retrieve your playlists</Text>
+      <Text style={styles.loginMsg}>To compete and post playlists you will need to login with spotify, click the button below to retrieve your playlists</Text>
       <TouchableHighlight onPress={() => spotifyAuth()} style={styles.loginButton}>
         <Text style={styles.login}>Login With Spotify</Text>
       </TouchableHighlight>
