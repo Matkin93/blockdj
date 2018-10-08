@@ -15,8 +15,15 @@ export default class AreaModal extends Component {
       loading: true
     };
   }
+
   setModalVisible(visible) {
     this.setState({ modalVisible: visible });
+  }
+
+  handleLike(playlist) {
+    this.state.playlists.find(playlistElem => {
+      return playlistElem._id === playlist._id
+    })
   }
 
   componentDidMount() {
@@ -79,10 +86,9 @@ export default class AreaModal extends Component {
                 <View style={styles.topDjTitleContainer}>
                   <Text style={styles.topDjTitle}>Top DJ</Text>
                 </View>
-                <Text style={styles.topDjUserAndPlaylist}>{this.state.topPlaylist.profile.username}</Text>
                 <Image style={styles.topDjImg}
                   source={{ uri: this.state.topPlaylist.profile.avatar_url }} />
-                <Text style={styles.topDjUserAndPlaylist}>With: {this.state.topPlaylist.name}</Text>
+                <Text style={styles.topDjUserAndPlaylist}>{this.state.topPlaylist.profile.username}</Text>
               </View>
               <View>
                 <Text style={styles.leaderboard}>
@@ -155,18 +161,19 @@ const styles = StyleSheet.create({
   },
   topDjUserAndPlaylist: {
     color: 'white',
-    fontSize: 20
+    fontSize: 15
   },
   topDjImg: {
     width: 75,
     height: 75,
     borderRadius: 37.5,
     borderColor: 'green',
-    borderWidth: 3
+    borderWidth: 3,
+    margin: 7
   },
   leaderboard: {
     color: 'white',
-    fontSize: 15,
+    fontSize: 20,
     alignSelf: 'center',
     marginTop: 10
   }

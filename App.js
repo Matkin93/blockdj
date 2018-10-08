@@ -58,89 +58,29 @@ export default class App extends Component<Props> {
     })
   }
 
-  initialiseChecks() {
-    setInterval(() => {
-      if (this.state.isInCity) {
-        navigator.geolocation.getCurrentPosition(position => {
-          const posArr = [position.coords.latitude, position.coords.longitude];
-          const cityArr = this.state.currentCity.coordinates.map(coord => [coord.latitude, coord.longitude]);
-          if (!inside(posArr, cityArr)) {
-            this.setState({
-              currentArea: {},
-              inAnArea: false,
-              areas: [],
-              currentCity: {},
-              isInCity: false
-            });
-            api.checkAreaAndFetchPlaylists(`lat=${position.coords.latitude}&long=${position.coords.longitude}`, this.state.currentCity._id)
-              .then(playlistDocs => {
-                const { playlists, area } = playlistDocs.data
-                this.setState({
-                  playlists,
-                  currentArea: area,
-                  inAnArea: true
-                })
-              })
-              .catch(console.log)
-          }
+  checkAreaAndFetchPlaylists(position) {
+    api.checkAreaAndFetchPlaylists(`lat=${position.coords.latitude}&long=${position.coords.longitude}`, this.state.currentCity._id)
+      .then(playlistDocs => {
+        const { playlists, area } = playlistDocs.data
+        this.setState({
+          playlists,
+          currentArea: area,
+          inAnArea: true
         })
-      }
-      else {
-        navigator.geolocation.getCurrentPosition(position => {
-          api.checkCityAndFetchAreas(`${position.coords.latitude}&${position.coords.longitude}`)
-            .then(areasDocs => {
-              const { areas, city } = areasDocs.data;
-              this.setState({
-                areas,
-                currentCity: city,
-                isInCity: true
-              })
-              return city
-            })
-            .then((city) => {
-              if (this.state.isInCity) {
-                api.checkAreaAndFetchPlaylists(`lat=${position.coords.latitude}&long=${position.coords.longitude}`, city._id)
-                  .then(playlistDocs => {
-                    const { playlists, area } = playlistDocs.data
-                    this.setState({
-                      playlists,
-                      currentArea: area,
-                      inAnArea: true
-                    })
-
-                  })
-                  .catch(console.log)
-              }
-            })
-            .catch(console.log)
-        })
-      }
-    }, 30000)
+      })
+      .catch(console.log)
   }
 
-  componentDidMount() {
-    this.watchID = navigator.geolocation.watchPosition(
-      (position) => {
-        this.setState({
-          currentLocation: {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            latitudeDelta: 0.0222,
-            longitudeDelta: 0.0321,
-            error: null,
-          }
-        });
-        api.checkCityAndFetchAreas(`${position.coords.latitude}&${position.coords.longitude}`)
-          .then(areasDocs => {
-            const { areas, city } = areasDocs.data;
-            this.setState({
-              areas,
-              currentCity: city,
-              isInCity: true
-            })
-            return city
-          })
-          .then((city) => {
+  checkCityAndFetchAreas(position) {
+    api.checkCityAndFetchAreas(`${position.coords.latitude}&${position.coords.longitude}`)
+      .then(areasDocs => {
+        const { areas, city } = areasDocs.data;
+        if (city._id) {
+          this.setState({
+            areas,
+            currentCity: city,
+            isInCity: true
+          }, () => {
             if (this.state.isInCity) {
               api.checkAreaAndFetchPlaylists(`lat=${position.coords.latitude}&long=${position.coords.longitude}`, city._id)
                 .then(playlistDocs => {
@@ -155,7 +95,57 @@ export default class App extends Component<Props> {
                 .catch(console.log)
             }
           })
-          .catch(console.log)
+        }
+      })
+      .catch(console.log)
+  }
+
+  initialiseChecks() {
+    setInterval(() => {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const posArr = [position.coords.latitude, position.coords.longitude];
+        if (!this.state.isInCity) {
+          this.checkAreaAndFetchPlaylists(position)
+        } else if (!this.state.inAnArea) {
+          this.checkAreaAndFetchPlaylists(position)
+        } else {
+          const cityArr = this.state.currentCity.coordinates.map(coord => [coord.latitude, coord.longitude]);
+          if (!inside(posArr, cityArr)) {
+            this.setState({
+              currentCity: {},
+              isInCity: false,
+              areas: [],
+              currentArea: {},
+              inAnArea: false
+            })
+          } else {
+            const cityArr = this.state.currentCity.coordinates.map(coord => [coord.latitude, coord.longitude]);
+            if (!inside(posArr, cityArr)) {
+              this.set({
+                currentArea: {},
+                inAnArea: false
+              })
+            }
+          }
+
+        }
+      })
+    }, 15000)
+  }
+
+  componentDidMount() {
+    this.watchID = navigator.geolocation.watchPosition(
+      (position) => {
+        this.setState({
+          currentLocation: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            latitudeDelta: 0.0222,
+            longitudeDelta: 0.0321,
+            error: null,
+          }
+        });
+        this.checkCityAndFetchAreas(position);
       },
       (error) => this.setState({ error: error.message }),
       { enableHighAccuracy: true, maximumAge: 1000, distanceFilter: 1 },
@@ -244,6 +234,6 @@ const styles = StyleSheet.create({
   },
   noAreaMsg: {
     color: 'white',
-    marginTop: 10
+    marginTop: 22
   }
 });
