@@ -5,14 +5,8 @@ export const checkCityAndFetchAreas = (coordsQuery) => axios.get(`${DB_URL}/area
 
 export const checkAreaAndFetchPlaylists = (coordsQuery, cityId) => axios.get(`${DB_URL}/playlists/${cityId}?${coordsQuery}`)
 
-export const getUser = (userID) => axios.get(`${DB_URL}/`);
+export const getUser = (username) => axios.get(`${DB_URL}/profiles/${username}`);
 
-export const getCities = () => axios.get(`${DB_URL}/cities`)
+export const getUserPlaylists = (userId) => axios.get(`${DB_URL}/user-playlists/${userId}`);
 
-export const getUserPlaylists = (userID) => fetch(`${DB_URL}/areas/${userID}`);
-
-export const getAreasByCity = (cityID) => fetch(`${DB_URL}/`);
-
-export const getAreaPlaylists = (areaID) => fetch(`${DB_URL}/`);
-
-export const postPlaylist = (areaID, playlist) => fetch(`${DB_URL}/`, { method: 'POST' });
+export const postPlaylist = (playlist) => axios.post(`${DB_URL}/playlists`, playlist);;

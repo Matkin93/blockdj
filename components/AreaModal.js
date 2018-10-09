@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableHighlight, Image, ScrollView } from 'react-native';
 import PlaylistModal from './PlaylistModal';
+import * as api from '../api';
+import SubmitPlaylist from "./SubmitPlaylist";
 
 export default class AreaModal extends Component {
   constructor(props) {
@@ -12,7 +14,11 @@ export default class AreaModal extends Component {
       areas: props.areas,
       playlists: props.playlists,
       topPlaylist: {},
-      loading: true
+      loading: true,
+      username: props.username,
+      userPlaylists: [],
+      showSubmitPlaylist: false,
+      submittedInThisArea: false
     };
   }
 
@@ -24,6 +30,32 @@ export default class AreaModal extends Component {
     this.state.playlists.find(playlistElem => {
       return playlistElem._id === playlist._id
     })
+  }
+
+  handleSubmit = () => {
+    this.setState({
+      submittedInThisArea: true
+    }, () => {
+
+    })
+  }
+
+  backToAreaModal = () => {
+    this.setState({
+      showSubmitPlaylist: false
+    })
+  }
+
+  getUserPlaylists() {
+    api.getUserPlaylists(this.state.username)
+      .then((userPlaylistsDocs) => {
+        const { playlists } = userPlaylistsDocs.data
+        this.setState({
+          userPlaylists: playlists,
+          showSubmitPlaylist: true
+        })
+      })
+      .catch(console.log)
   }
 
   componentDidMount() {
@@ -66,6 +98,9 @@ export default class AreaModal extends Component {
         </TouchableHighlight>
       </View>
     )
+    else if (this.state.showSubmitPlaylist) return (
+      <SubmitPlaylist userPlaylists={this.state.userPlaylists} modalVisible={this.state.modalVisible} backToAreaModal={this.backToAreaModal} currentArea={this.state.currentArea} username={this.state.username} handleSubmit={this.handleSubmit} />
+    )
     else return (
       <View style={{ marginTop: 22 }}>
         <Modal
@@ -90,6 +125,11 @@ export default class AreaModal extends Component {
                   source={{ uri: this.state.topPlaylist.profile.avatar_url }} />
                 <Text style={styles.topDjUserAndPlaylist}>{this.state.topPlaylist.profile.username}</Text>
               </View>
+              {!this.state.submittedInThisArea ? <TouchableHighlight onPress={() => this.getUserPlaylists()} style={styles.submitPlaylistButton}>
+                <Text style={styles.submitPlaylist}>Submit your own playlist!</Text>
+              </TouchableHighlight> : <View style={styles.alreadySubmittedPlaylistContainer}>
+                  <Text style={styles.alreadySubmittedPlaylist}>You've submitted a playlist here this week</Text>
+                </View>}
               <View>
                 <Text style={styles.leaderboard}>
                   Top Playlists of the Week
@@ -138,7 +178,8 @@ const styles = StyleSheet.create({
   },
   modalDismiss: {
     color: 'white',
-    marginBottom: 20,
+    marginBottom: 10,
+    marginTop: 10
   },
   modalMsg: {
     color: 'white'
@@ -176,5 +217,34 @@ const styles = StyleSheet.create({
     fontSize: 20,
     alignSelf: 'center',
     marginTop: 10
+  },
+  submitPlaylist: {
+    padding: 10,
+  },
+  submitPlaylistButton: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
+    width: 190,
+    backgroundColor: 'green',
+    borderRadius: 10,
+    margin: 10
+  },
+  alreadySubmittedPlaylistContainer: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
+    width: 350,
+    borderRadius: 10,
+    borderColor: 'green',
+    borderWidth: 2,
+    margin: 10
+  },
+  alreadySubmittedPlaylist: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
+    color: 'white',
+    padding: 10
   }
 });

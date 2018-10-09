@@ -12,10 +12,8 @@ export default class App extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
+      username: 'rkerwen0',
       currentUser: {
-        username: 'Matthew Atkin',
-        points: 200,
-        hasChosenSpotifyOption: false
       },
       currentLocation: {},
       inAnArea: false,
@@ -25,7 +23,8 @@ export default class App extends Component<Props> {
       areas: [],
       isLoggedIn: false,
       currentCity: {},
-      isInCity: false
+      isInCity: false,
+      loading: false
     }
   }
 
@@ -50,11 +49,20 @@ export default class App extends Component<Props> {
   }
 
   login() {
-    //api call to either create or get user info
-    //.then( * setState with recieved userData)
-    //if user has logged into spotify before set hasChosedSpotifyOption to true
     this.setState({
-      loggedIn: true
+      loading: true
+    }, () => {
+      api.getUser(this.state.username)
+        .then(userDoc => {
+          const { profile } = userDoc.data;
+          this.setState({
+            currentUser: profile[0],
+            loading: false,
+            loggedIn: true
+          }, () => {
+          })
+        })
+        .catch(console.log)
     })
   }
 
@@ -164,13 +172,18 @@ export default class App extends Component<Props> {
     else if (!this.state.currentUser.hasChosenSpotifyOption) return (
       <SpotifyAuth styles={styles} spotifyAuth={() => this.spotifyAuth()} noSpotifyAuth={() => this.noSpotifyAuth()} />
     )
+    else if (this.state.loading) return (
+      <View>
+        <Text>Loading</Text>
+      </View>
+    )
     else return (
       <View style={styles.container}>
         <View>
           <Text style={styles.title}>Block DJ</Text>
         </View>
         <Map styles={styles} currentLocation={this.state.currentLocation} areas={this.state.areas} />
-        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} areas={this.state.areas} playlists={this.state.playlists} />}
+        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} areas={this.state.areas} playlists={this.state.playlists} username={this.state.username} />}
         {!this.state.inAnArea && <Text style={styles.noAreaMsg}>Make your way to an area to see playlists</Text>}
       </View>
     );

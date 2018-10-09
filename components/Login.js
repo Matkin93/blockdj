@@ -1,16 +1,12 @@
 import React from 'react';
-import { Text, View, TouchableHighlight } from 'react-native';
+import { Text, View, TouchableHighlight, Image } from 'react-native';
+import logo from '/Users/matthewatkin/Northcoders/app-test/pleasework/assets/images/block-dj-logo-1.png';
 
 const Login = ({
   styles, login
 }) => (
     <View style={styles.container}>
-      <Text style={styles.loginTitle}>
-        Block DJ
-      </Text>
-      <Text style={styles.loginMsg}>
-        Login to become to the Top DJ of your area!
-      </Text>
+      <Image source={logo} style={{ marginBottom: 15 }} />
       <TouchableHighlight onPress={() => login()} style={styles.loginButton}>
         <Text style={styles.login}>Login With Facebook</Text>
       </TouchableHighlight>
