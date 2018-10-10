@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableHighlight, Image } from 'react-native';
+import { View, Text, Modal, StyleSheet, TouchableHighlight, Image, ScrollView } from 'react-native';
+import * as api from '../api';
 
 export default class PlaylistModal extends Component {
   constructor(props) {
@@ -7,11 +8,26 @@ export default class PlaylistModal extends Component {
     this.state = {
       modalVisible: false,
       playlist: props.playlist,
-      handleLike: props.handleLike
+      handleLike: props.handleLike,
+      hasVotedOnPlaylist: false
     };
   }
   setModalVisible(visible) {
     this.setState({ modalVisible: visible });
+  }
+
+  votePlaylist() {
+    api.votePlaylist(this.state.playlist._id)
+      .then(playlistDoc => {
+        const newPlaylist = playlistDoc.data.playlist;
+        newPlaylist.profile = this.state.playlist.profile;
+        this.setState({
+          playlist: newPlaylist,
+          hasVotedOnPlaylist: true
+        }, () => {
+          this.state.handleLike();
+        })
+      })
   }
 
   render() {
@@ -32,21 +48,30 @@ export default class PlaylistModal extends Component {
               <Text style={styles.votesTitle}>
                 {this.state.playlist.votes} points
               </Text>
-              <Image style={styles.userImg}
-                source={{ uri: this.state.playlist.profile.avatar_url }} />
             </View>
-            <View >
-              {this.state.playlist.tracks.map(track => {
-                return <View key={track._id} style={styles.songContainer}>
-                  <Text style={styles.title}>{track.title}</Text>
-                  <Text style={styles.artist}>{track.artist} | {track.album}</Text>
-                </View>
-              })}
-            </View>
+            <ScrollView>
+              <View>
+                <Image style={styles.userImg}
+                  source={{ uri: this.state.playlist.profile.avatar_url }} />
+              </View>
+              <View style={styles.playlistContainer}>
+                {this.state.playlist.tracks.map(track => {
+                  return <View key={track._id} style={styles.songContainer}>
+                    <Text style={styles.title}>{track.title}</Text>
+                    <Text style={styles.artist}>{track.artist} | {track.album}</Text>
+                  </View>
+                })}
+              </View>
+            </ScrollView>
             <View>
-              <TouchableHighlight style={styles.upVoteButton} onPress={() => { this.state.handleLike() }}>
+              {!this.state.hasVotedOnPlaylist ? <TouchableHighlight style={styles.upVoteButton} onPress={() => this.votePlaylist()}>
                 <Text style={styles.upVote}>I like this playlist</Text>
-              </TouchableHighlight>
+              </TouchableHighlight> : <View style={styles.alreadyVotedContainer}>
+                  <Text style={styles.alreadyVoted}>
+                    You like this playlist
+                  </Text>
+                </View>
+              }
             </View>
             <View >
               <TouchableHighlight
@@ -61,7 +86,7 @@ export default class PlaylistModal extends Component {
         <TouchableHighlight
           onPress={() => {
             this.setModalVisible(true);
-          }}>
+          }} style={{ margin: 0, padding: 0 }}>
           <View style={styles.playlistInfo}>
             <Text style={styles.playlistName}>{this.state.playlist.name}</Text>
             <Text style={styles.playlistVotes}>{this.state.playlist.votes} points</Text>
@@ -76,14 +101,16 @@ const styles = StyleSheet.create({
   modal: {
     flex: 1,
     backgroundColor: '#171738',
-    alignItems: 'center',
+    // alignItems: 'center',
     justifyContent: 'space-between',
   },
   playlistTitle: {
     color: 'white',
     fontSize: 30,
     marginTop: 30,
-    marginBottom: 7
+    marginBottom: 7,
+    alignSelf: 'center',
+    fontWeight: 'bold',
   },
   votesTitle: {
     color: 'grey',
@@ -93,22 +120,21 @@ const styles = StyleSheet.create({
   modalDismiss: {
     color: 'white',
     marginBottom: 20,
+    alignSelf: 'center',
   },
   modalMsg: {
-    color: 'white'
+    color: 'white',
+    alignSelf: 'center',
   },
   playlistInfo: {
-    flex: 1,
-    alignItems: 'center'
+    paddingHorizontal: 10,
   },
   playlistName: {
-    fontSize: 15,
-    marginBottom: 7,
+    fontSize: 17,
     color: 'white'
   },
   playlistVotes: {
-    fontSize: 13,
-    marginBottom: 2,
+    fontSize: 15,
     color: 'grey'
   },
   title: {
@@ -117,11 +143,12 @@ const styles = StyleSheet.create({
   },
   artist: {
     color: 'grey',
-    fontSize: 15,
+    fontSize: 13,
     marginBottom: 10
   },
   songContainer: {
-    width: 300
+    paddingLeft: 15,
+    paddingRight: 15,
   },
   userImg: {
     width: 60,
@@ -134,10 +161,39 @@ const styles = StyleSheet.create({
   },
   upVote: {
     padding: 10,
+    alignSelf: 'center',
   },
   upVoteButton: {
     backgroundColor: 'green',
     borderRadius: 10,
+    margin: 10,
+    width: 130,
+    alignSelf: 'center',
+  },
+  playlistContainer: {
+    flex: 1,
+    marginTop: 20,
+    paddingLeft: 15,
+    paddingRight: 15,
+    alignContent: 'flex-start',
+    alignSelf: 'flex-start',
+    marginBottom: 3
+  },
+  alreadyVotedContainer: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
+    width: 180,
+    borderRadius: 10,
+    borderColor: 'green',
+    borderWidth: 2,
     margin: 10
   },
+  alreadyVoted: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    alignContent: 'center',
+    color: 'green',
+    padding: 10
+  }
 });

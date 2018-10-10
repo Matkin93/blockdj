@@ -18,7 +18,9 @@ export default class AreaModal extends Component {
       username: props.username,
       userPlaylists: [],
       showSubmitPlaylist: false,
-      submittedInThisArea: false
+      submittedInThisArea: false,
+      userId: props.userId,
+      fetchPlaylists: props.fetchPlaylists
     };
   }
 
@@ -26,14 +28,18 @@ export default class AreaModal extends Component {
     this.setState({ modalVisible: visible });
   }
 
-  handleLike(playlist) {
-    this.state.playlists.find(playlistElem => {
-      return playlistElem._id === playlist._id
-    })
+  handleLike = (playlist) => {
+    this.sortPlaylists();
   }
 
-  handleSubmit = () => {
+  handleSubmit = (playlist) => {
+    const newPlaylistArr = [...this.state.playlists];
+    newPlaylistArr.forEach((playlist, i) => {
+      newPlaylistArr[i].tracks = [...playlist.tracks]
+    })
+    newPlaylistArr.push(playlist)
     this.setState({
+      playlists: newPlaylistArr,
       submittedInThisArea: true
     }, () => {
 
@@ -47,9 +53,11 @@ export default class AreaModal extends Component {
   }
 
   getUserPlaylists() {
+    console.log(this.state.username)
     api.getUserPlaylists(this.state.username)
       .then((userPlaylistsDocs) => {
         const { playlists } = userPlaylistsDocs.data
+        console.log(playlists)
         this.setState({
           userPlaylists: playlists,
           showSubmitPlaylist: true
@@ -59,6 +67,28 @@ export default class AreaModal extends Component {
   }
 
   componentDidMount() {
+    // const topPlaylist = this.state.playlists.reduce((topPlaylist, playlist, i) => {
+    //   if (i === 0) topPlaylist = playlist;
+    //   else if (playlist.votes > topPlaylist.votes) topPlaylist = playlist;
+    //   return topPlaylist;
+    // }, {})
+    // const orderedPlaylists = this.state.playlists.sort(function (a, b) {
+    //   return a.votes - b.votes;
+    // }).reverse();
+    // let hasSubmitted = false;
+    // this.state.playlists.forEach(playlist => {
+    //   if (playlist.profile._id === this.state.userId) hasSubmitted = true;
+    // })
+    // this.setState({
+    //   topPlaylist,
+    //   loading: false,
+    //   playlists: orderedPlaylists,
+    //   submittedInThisArea: hasSubmitted
+    // })
+    this.sortPlaylists();
+  }
+
+  sortPlaylists() {
     const topPlaylist = this.state.playlists.reduce((topPlaylist, playlist, i) => {
       if (i === 0) topPlaylist = playlist;
       else if (playlist.votes > topPlaylist.votes) topPlaylist = playlist;
@@ -67,12 +97,19 @@ export default class AreaModal extends Component {
     const orderedPlaylists = this.state.playlists.sort(function (a, b) {
       return a.votes - b.votes;
     }).reverse();
+    let hasSubmitted = false;
+    this.state.playlists.forEach(playlist => {
+      if (playlist.profile._id === this.state.userId) hasSubmitted = true;
+    })
     this.setState({
       topPlaylist,
       loading: false,
-      playlists: orderedPlaylists
+      playlists: orderedPlaylists,
+      submittedInThisArea: hasSubmitted
     })
   }
+
+
 
   render() {
     if (this.state.loading) return (
@@ -84,8 +121,8 @@ export default class AreaModal extends Component {
           onRequestClose={() => {
             Alert.alert('Modal has been closed.');
           }} >
-          <View>
-            <Text>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loading}>
               Loading
             </Text>
           </View>
@@ -99,7 +136,7 @@ export default class AreaModal extends Component {
       </View>
     )
     else if (this.state.showSubmitPlaylist) return (
-      <SubmitPlaylist userPlaylists={this.state.userPlaylists} modalVisible={this.state.modalVisible} backToAreaModal={this.backToAreaModal} currentArea={this.state.currentArea} username={this.state.username} handleSubmit={this.handleSubmit} />
+      <SubmitPlaylist userPlaylists={this.state.userPlaylists} modalVisible={this.state.modalVisible} backToAreaModal={this.backToAreaModal} currentArea={this.state.currentArea} username={this.state.username} handleSubmit={this.handleSubmit} handleLike={this.handleLike} />
     )
     else return (
       <View style={{ marginTop: 22 }}>
@@ -111,12 +148,12 @@ export default class AreaModal extends Component {
             Alert.alert('Modal has been closed.');
           }} >
           <View style={styles.modal}>
+            <View>
+              <Text style={styles.modalTitle}>
+                {this.state.currentArea.name}
+              </Text>
+            </View>
             <ScrollView style={styles.scrollView}>
-              <View>
-                <Text style={styles.modalTitle}>
-                  {this.state.currentArea.name}
-                </Text>
-              </View>
               <View style={styles.topDj}>
                 <View style={styles.topDjTitleContainer}>
                   <Text style={styles.topDjTitle}>Top DJ</Text>
@@ -125,11 +162,14 @@ export default class AreaModal extends Component {
                   source={{ uri: this.state.topPlaylist.profile.avatar_url }} />
                 <Text style={styles.topDjUserAndPlaylist}>{this.state.topPlaylist.profile.username}</Text>
               </View>
-              {!this.state.submittedInThisArea ? <TouchableHighlight onPress={() => this.getUserPlaylists()} style={styles.submitPlaylistButton}>
-                <Text style={styles.submitPlaylist}>Submit your own playlist!</Text>
+              {/* {!this.state.submittedInThisArea ? <TouchableHighlight onPress={() => this.getUserPlaylists()} style={styles.submitPlaylistButton}>
+                <Text style={styles.submitPlaylist}>Submit your playlist</Text>
               </TouchableHighlight> : <View style={styles.alreadySubmittedPlaylistContainer}>
                   <Text style={styles.alreadySubmittedPlaylist}>You've submitted a playlist here this week</Text>
-                </View>}
+                </View>} */}
+              <TouchableHighlight onPress={() => this.getUserPlaylists()} style={styles.submitPlaylistButton}>
+                <Text style={styles.submitPlaylist}>Submit your playlist</Text>
+              </TouchableHighlight>
               <View>
                 <Text style={styles.leaderboard}>
                   Top Playlists of the Week
@@ -137,7 +177,7 @@ export default class AreaModal extends Component {
               </View>
               <View >
                 {this.state.playlists.map(playlist => {
-                  return <PlaylistModal currentArea={this.state.currentArea} playlist={playlist} key={playlist._id} />
+                  return <PlaylistModal currentArea={this.state.currentArea} playlist={playlist} key={playlist._id} handleLike={this.handleLike} />
                 })}
               </View>
             </ScrollView>
@@ -174,7 +214,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     marginTop: 30,
     alignSelf: 'center',
-    marginBottom: 15
+    marginBottom: 5,
+    fontWeight: 'bold',
   },
   modalDismiss: {
     color: 'white',
@@ -198,7 +239,8 @@ const styles = StyleSheet.create({
   },
   topDjTitle: {
     color: 'white',
-    fontSize: 25
+    fontSize: 25,
+    marginTop: 10
   },
   topDjUserAndPlaylist: {
     color: 'white',
@@ -244,7 +286,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     alignContent: 'center',
-    color: 'white',
+    color: 'green',
     padding: 10
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignContent: 'center',
+  },
+  loading: {
+    color: 'white',
+    fontSize: 50,
   }
 });

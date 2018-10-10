@@ -29,7 +29,12 @@ export default class SubmitPlaylist extends Component {
         }} >
         <View style={styles.modal}>
           <View >
-            {hasSubmittedPlaylist ? <Text>done</Text> : <Text>Loading</Text>}
+            {/* {hasSubmittedPlaylist ? <Text>done</Text> : <Text>Loading</Text>} */}
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loading}>
+                Loading
+              </Text>
+            </View>
           </View>
         </View>
       </Modal>
@@ -93,16 +98,13 @@ export default class SubmitPlaylist extends Component {
       loading: true
     }, () => {
       api.postPlaylist(playlist)
-        .then((playlist) => {
-          console.log(playlist.data.playlist)
+        .then((playlistDoc) => {
+          const { playlist } = playlistDoc.data;
+          console.log(playlist)
           this.state.handleSubmit(playlist);
-          this.setState({
-            hasSubmittedPlaylist: true
-          }, () => {
-            setTimeout(() => {
-              this.state.backToAreaModal()
-            }, 2000)
-          })
+          setTimeout(() => {
+            this.state.backToAreaModal();
+          }, 2000)
         })
         .catch(console.log)
     })
@@ -145,5 +147,14 @@ const styles = StyleSheet.create({
   playlistLength: {
     color: 'grey',
     fontSize: 17
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignContent: 'center',
+  },
+  loading: {
+    color: 'white',
+    fontSize: 50,
   }
 });

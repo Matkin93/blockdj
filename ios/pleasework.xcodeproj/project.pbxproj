@@ -55,6 +55,8 @@
 		017E9E9ED63C49B5BF5FB582 /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A526C2765E6E4F2DAD465DF8 /* Octicons.ttf */; };
 		2FE895A99E7D4EE9A51F9CBB /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1FFF5A42A107495CA43E769D /* SimpleLineIcons.ttf */; };
 		0B7DE858C26B4DC1A0CC0734 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4EC1580A32994449AD7C82DC /* Zocial.ttf */; };
+		38FD99FA3A2542F3947AFACC /* Linebeam.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 26C2241E9A5545EC8BD4D943 /* Linebeam.ttf */; };
+		942C7CFAEF3E4B348E4961B1 /* Magnifico.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0F10AAE52EFD4FDAB5D8505A /* Magnifico.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -382,6 +384,8 @@
 		A526C2765E6E4F2DAD465DF8 /* Octicons.ttf */ = {isa = PBXFileReference; name = "Octicons.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		1FFF5A42A107495CA43E769D /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; name = "SimpleLineIcons.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		4EC1580A32994449AD7C82DC /* Zocial.ttf */ = {isa = PBXFileReference; name = "Zocial.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		26C2241E9A5545EC8BD4D943 /* Linebeam.ttf */ = {isa = PBXFileReference; name = "Linebeam.ttf"; path = "../assets/fonts/Linebeam.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		0F10AAE52EFD4FDAB5D8505A /* Magnifico.ttf */ = {isa = PBXFileReference; name = "Magnifico.ttf"; path = "../assets/fonts/Magnifico.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -678,6 +682,8 @@
 				A526C2765E6E4F2DAD465DF8 /* Octicons.ttf */,
 				1FFF5A42A107495CA43E769D /* SimpleLineIcons.ttf */,
 				4EC1580A32994449AD7C82DC /* Zocial.ttf */,
+				26C2241E9A5545EC8BD4D943 /* Linebeam.ttf */,
+				0F10AAE52EFD4FDAB5D8505A /* Magnifico.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1149,6 +1155,8 @@
 				017E9E9ED63C49B5BF5FB582 /* Octicons.ttf in Resources */,
 				2FE895A99E7D4EE9A51F9CBB /* SimpleLineIcons.ttf in Resources */,
 				0B7DE858C26B4DC1A0CC0734 /* Zocial.ttf in Resources */,
+				38FD99FA3A2542F3947AFACC /* Linebeam.ttf in Resources */,
+				942C7CFAEF3E4B348E4961B1 /* Magnifico.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,18 +1,19 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Linking } from 'react-native';
+import { StyleSheet, Text, View, Linking, Image } from 'react-native';
 import AreaModal from './components/AreaModal';
 import Login from './components/Login';
 import SpotifyAuth from './components/SpotifyAuth';
 import Map from './components/Map';
 import inside from 'point-in-polygon';
 import * as api from './api';
+import logo from '/Users/matthewatkin/Northcoders/app-test/pleasework/assets/images/block-dj-logo-small.png'
 
 type Props = {};
 export default class App extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
-      username: 'rkerwen0',
+      username: 'ksouthouse1',
       currentUser: {
       },
       currentLocation: {},
@@ -24,7 +25,8 @@ export default class App extends Component<Props> {
       isLoggedIn: false,
       currentCity: {},
       isInCity: false,
-      loading: false
+      loading: false,
+      hasChosenSpotifyOption: false
     }
   }
 
@@ -33,18 +35,14 @@ export default class App extends Component<Props> {
     Linking.openURL('http://localhost:8888')
       .then(() => {
         this.setState({
-          currentUser: {
-            hasChosenSpotifyOption: true
-          }
+          hasChosenSpotifyOption: true
         })
       })
   }
 
   noSpotifyAuth() {
     this.setState({
-      currentUser: {
-        hasChosenSpotifyOption: true
-      }
+      hasChosenSpotifyOption: true
     })
   }
 
@@ -60,6 +58,7 @@ export default class App extends Component<Props> {
             loading: false,
             loggedIn: true
           }, () => {
+            console.log(this.state.currentUser)
           })
         })
         .catch(console.log)
@@ -92,7 +91,7 @@ export default class App extends Component<Props> {
             if (this.state.isInCity) {
               api.checkAreaAndFetchPlaylists(`lat=${position.coords.latitude}&long=${position.coords.longitude}`, city._id)
                 .then(playlistDocs => {
-                  const { playlists, area } = playlistDocs.data
+                  const { playlists, area } = playlistDocs.data;
                   this.setState({
                     playlists,
                     currentArea: area,
@@ -126,10 +125,10 @@ export default class App extends Component<Props> {
               currentArea: {},
               inAnArea: false
             })
-          } else {
-            const cityArr = this.state.currentCity.coordinates.map(coord => [coord.latitude, coord.longitude]);
-            if (!inside(posArr, cityArr)) {
-              this.set({
+          } else if (this.state.inAnArea) {
+            const areaArr = this.state.currentArea.bounds.map(coord => [coord.latitude, coord.longitude]);
+            if (!inside(posArr, areaArr)) {
+              this.setState({
                 currentArea: {},
                 inAnArea: false
               })
@@ -169,7 +168,7 @@ export default class App extends Component<Props> {
     if (!this.state.loggedIn) return (
       <Login styles={styles} login={() => this.login()} />
     )
-    else if (!this.state.currentUser.hasChosenSpotifyOption) return (
+    else if (!this.state.hasChosenSpotifyOption) return (
       <SpotifyAuth styles={styles} spotifyAuth={() => this.spotifyAuth()} noSpotifyAuth={() => this.noSpotifyAuth()} />
     )
     else if (this.state.loading) return (
@@ -180,10 +179,11 @@ export default class App extends Component<Props> {
     else return (
       <View style={styles.container}>
         <View>
-          <Text style={styles.title}>Block DJ</Text>
+          {/* <Text style={styles.title}>Block DJ</Text> */}
+          <Image source={logo} style={{ marginBottom: 7, marginTop: 10 }} />
         </View>
         <Map styles={styles} currentLocation={this.state.currentLocation} areas={this.state.areas} />
-        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} areas={this.state.areas} playlists={this.state.playlists} username={this.state.username} />}
+        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} areas={this.state.areas} playlists={this.state.playlists} username={this.state.username} userId={this.state.currentUser._id} />}
         {!this.state.inAnArea && <Text style={styles.noAreaMsg}>Make your way to an area to see playlists</Text>}
       </View>
     );
@@ -196,6 +196,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#171738',
     alignItems: 'center',
     justifyContent: 'center',
+    alignContent: 'center',
   },
   authContainer: {
     flex: 1,
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
   },
   map: {
-    height: 550,
+    height: 538,
     width: 500
   },
   title: {
@@ -230,11 +231,19 @@ const styles = StyleSheet.create({
   },
   login: {
     padding: 10,
+    color: 'white',
+    fontSize: 20,
+    alignSelf: 'center',
+    alignContent: 'center',
+    justifyContent: 'center'
   },
   loginButton: {
     backgroundColor: 'green',
     borderRadius: 10,
-    margin: 10
+    margin: 10,
+    alignItems: 'center',
+    alignContent: 'center',
+    justifyContent: 'center'
   },
   loginTitle: {
     fontSize: 40,
