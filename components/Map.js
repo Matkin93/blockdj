@@ -16,7 +16,7 @@ const componentName = ({
             strokeWidth={2}
             strokeColor='#171738'
           />
-          <Marker coordinate={area.markerLocation} pinColor='#171738'
+          <Marker coordinate={area.markerLocation = area.bounds[0]} pinColor='#171738'
             image='/Users/matthewatkin/Northcoders/app-test/pleasework/assets/images/vinyl.png'
           >
             <Callout style={styles.areaCallout}>

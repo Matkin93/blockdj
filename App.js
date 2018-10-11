@@ -13,7 +13,7 @@ export default class App extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
-      username: 'ksouthouse1',
+      username: 'matkin93',
       currentUser: {
       },
       currentLocation: {},
@@ -57,8 +57,6 @@ export default class App extends Component<Props> {
             currentUser: profile[0],
             loading: false,
             loggedIn: true
-          }, () => {
-            console.log(this.state.currentUser)
           })
         })
         .catch(console.log)
@@ -147,8 +145,8 @@ export default class App extends Component<Props> {
           currentLocation: {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-            latitudeDelta: 0.0222,
-            longitudeDelta: 0.0321,
+            latitudeDelta: 0.0122,
+            longitudeDelta: 0.0221,
             error: null,
           }
         });
@@ -183,7 +181,7 @@ export default class App extends Component<Props> {
           <Image source={logo} style={{ marginBottom: 7, marginTop: 10 }} />
         </View>
         <Map styles={styles} currentLocation={this.state.currentLocation} areas={this.state.areas} />
-        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} areas={this.state.areas} playlists={this.state.playlists} username={this.state.username} userId={this.state.currentUser._id} />}
+        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} areas={this.state.areas} playlists={this.state.playlists} username={this.state.username} userId={this.state.currentUser._id} currentUser={this.state.currentUser} />}
         {!this.state.inAnArea && <Text style={styles.noAreaMsg}>Make your way to an area to see playlists</Text>}
       </View>
     );

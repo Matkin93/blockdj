@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableHighlight, Image, ScrollView } from 'react-native';
+import { View, Text, Modal, StyleSheet, TouchableHighlight, Image, ScrollView, Linking } from 'react-native';
 import * as api from '../api';
 
 export default class PlaylistModal extends Component {
@@ -30,6 +30,10 @@ export default class PlaylistModal extends Component {
       })
   }
 
+  openSpotify(url) {
+    Linking.openURL(url);
+  }
+
   render() {
     return (
       <View style={{ marginTop: 22 }}>
@@ -53,13 +57,16 @@ export default class PlaylistModal extends Component {
               <View>
                 <Image style={styles.userImg}
                   source={{ uri: this.state.playlist.profile.avatar_url }} />
+                <Text style={styles.votesTitleA}>{this.state.playlist.profile.username}</Text>
               </View>
               <View style={styles.playlistContainer}>
                 {this.state.playlist.tracks.map(track => {
-                  return <View key={track._id} style={styles.songContainer}>
-                    <Text style={styles.title}>{track.title}</Text>
-                    <Text style={styles.artist}>{track.artist} | {track.album}</Text>
-                  </View>
+                  return <TouchableHighlight onPress={() => this.openSpotify(this.state.playlist.playlist_url)} key={track._id}>
+                    <View style={styles.songContainer}>
+                      <Text style={styles.title}>{track.title}</Text>
+                      <Text style={styles.artist}>{track.artist} | {track.album}</Text>
+                    </View>
+                  </TouchableHighlight>
                 })}
               </View>
             </ScrollView>
@@ -101,7 +108,6 @@ const styles = StyleSheet.create({
   modal: {
     flex: 1,
     backgroundColor: '#171738',
-    // alignItems: 'center',
     justifyContent: 'space-between',
   },
   playlistTitle: {
@@ -117,9 +123,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     alignSelf: 'center'
   },
+  votesTitleA: {
+    color: 'grey',
+    fontSize: 15,
+    alignSelf: 'center',
+    marginTop: 5
+  },
   modalDismiss: {
     color: 'white',
-    marginBottom: 20,
+    marginBottom: 10,
     alignSelf: 'center',
   },
   modalMsg: {
@@ -166,7 +178,7 @@ const styles = StyleSheet.create({
   upVoteButton: {
     backgroundColor: 'green',
     borderRadius: 10,
-    margin: 10,
+    marginBottom: 10,
     width: 130,
     alignSelf: 'center',
   },

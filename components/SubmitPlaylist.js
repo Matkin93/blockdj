@@ -88,7 +88,7 @@ export default class SubmitPlaylist extends Component {
     );
   }
 
-  submitPlaylist = (currentArea, playlist, username, backToAreaModal) => {
+  submitPlaylist = (currentArea, playlist, username) => {
     playlist.area = currentArea._id;
     playlist.profile = username;
     delete playlist._id;
@@ -100,7 +100,6 @@ export default class SubmitPlaylist extends Component {
       api.postPlaylist(playlist)
         .then((playlistDoc) => {
           const { playlist } = playlistDoc.data;
-          console.log(playlist)
           this.state.handleSubmit(playlist);
           setTimeout(() => {
             this.state.backToAreaModal();
