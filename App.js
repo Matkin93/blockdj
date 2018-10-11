@@ -13,7 +13,6 @@ export default class App extends Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
-      username: 'matkin93',
       currentUser: {
       },
       currentLocation: {},
@@ -32,7 +31,7 @@ export default class App extends Component<Props> {
 
 
   spotifyAuth() {
-    Linking.openURL('http://localhost:8888')
+    Linking.openURL('http://localhost:8888/login')
       .then(() => {
         this.setState({
           hasChosenSpotifyOption: true
@@ -46,18 +45,21 @@ export default class App extends Component<Props> {
     })
   }
 
-  login() {
+  login = (username) => {
     this.setState({
       loading: true
     }, () => {
-      api.getUser(this.state.username)
+      api.getUser(username)
         .then(userDoc => {
           const { profile } = userDoc.data;
-          this.setState({
-            currentUser: profile[0],
-            loading: false,
-            loggedIn: true
-          })
+          console.log(profile)
+          if (profile[0]._id) {
+            this.setState({
+              currentUser: profile[0],
+              loading: false,
+              loggedIn: true
+            })
+          }
         })
         .catch(console.log)
     })
@@ -164,7 +166,7 @@ export default class App extends Component<Props> {
 
   render() {
     if (!this.state.loggedIn) return (
-      <Login styles={styles} login={() => this.login()} />
+      <Login styles={styles} login={this.login} />
     )
     else if (!this.state.hasChosenSpotifyOption) return (
       <SpotifyAuth styles={styles} spotifyAuth={() => this.spotifyAuth()} noSpotifyAuth={() => this.noSpotifyAuth()} />
@@ -178,10 +180,10 @@ export default class App extends Component<Props> {
       <View style={styles.container}>
         <View>
           {/* <Text style={styles.title}>Block DJ</Text> */}
-          <Image source={logo} style={{ marginBottom: 7, marginTop: 10 }} />
+          <Image source={logo} style={{ marginBottom: 7, marginTop: 15 }} />
         </View>
         <Map styles={styles} currentLocation={this.state.currentLocation} areas={this.state.areas} />
-        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} areas={this.state.areas} playlists={this.state.playlists} username={this.state.username} userId={this.state.currentUser._id} currentUser={this.state.currentUser} />}
+        {this.state.inAnArea && <AreaModal currentLocation={this.state.currentLocation} currentArea={this.state.currentArea} areas={this.state.areas} playlists={this.state.playlists} username={this.state.currentUser.username} userId={this.state.currentUser._id} currentUser={this.state.currentUser} />}
         {!this.state.inAnArea && <Text style={styles.noAreaMsg}>Make your way to an area to see playlists</Text>}
       </View>
     );

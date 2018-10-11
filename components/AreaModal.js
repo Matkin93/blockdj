@@ -55,8 +55,10 @@ export default class AreaModal extends Component {
   }
 
   getUserPlaylists() {
+    console.log('<<<<<<')
     api.getUserPlaylists(this.state.username)
       .then((userPlaylistsDocs) => {
+        console.log(userPlaylistsDocs)
         const { playlists } = userPlaylistsDocs.data
         this.setState({
           userPlaylists: playlists,
@@ -156,7 +158,7 @@ export default class AreaModal extends Component {
               </View>
               <View >
                 {this.state.playlists.map(playlist => {
-                  return <PlaylistModal currentArea={this.state.currentArea} playlist={playlist} key={playlist._id} handleLike={this.handleLike} />
+                  return <PlaylistModal currentArea={this.state.currentArea} playlist={playlist} key={playlist._id} handleLike={this.handleLike} currentUser={this.state.currentUser} />
                 })}
               </View>
             </ScrollView>}
@@ -209,10 +211,25 @@ const styles = StyleSheet.create({
   modalDismiss: {
     color: 'white',
     marginBottom: 10,
-    marginTop: 10
+    alignSelf: 'center',
+    borderColor: 'white',
+    borderWidth: 2,
+    borderRadius: 10,
+    fontSize: 17,
+    marginTop: 10,
+    paddingHorizontal: 5,
+    paddingVertical: 3
   },
   modalMsg: {
-    color: 'white'
+    color: 'white',
+    fontSize: 17,
+    borderColor: 'white',
+    borderWidth: 2,
+    borderRadius: 10,
+    paddingVertical: 3,
+    paddingHorizontal: 5,
+    marginBottom: 15,
+    marginTop: 0
   },
   scrollView: {
     width: '100%',

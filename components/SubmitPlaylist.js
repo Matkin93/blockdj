@@ -29,7 +29,6 @@ export default class SubmitPlaylist extends Component {
         }} >
         <View style={styles.modal}>
           <View >
-            {/* {hasSubmittedPlaylist ? <Text>done</Text> : <Text>Loading</Text>} */}
             <View style={styles.loadingContainer}>
               <Text style={styles.loading}>
                 Loading
@@ -54,11 +53,11 @@ export default class SubmitPlaylist extends Component {
                 Your Playlists
             </Text>
             </View>
-            <View>
-              <Text>
-                Choose you playlist carefully
-            </Text>
-              <Text>
+            <View style={styles.noPLaylsitsContainer}>
+              <Text style={styles.noPLaylsitsMsg}>
+                Choose your playlist carefully
+              </Text >
+              <Text style={styles.noPLaylsitsMsg}>
                 You only get one per area per week
             </Text>
             </View>
@@ -122,11 +121,14 @@ const styles = StyleSheet.create({
     fontSize: 30,
     marginTop: 30,
     alignSelf: 'center',
-    marginBottom: 40
+    marginBottom: 40,
+    fontWeight: 'bold',
   },
   modalDismiss: {
     color: 'white',
-    marginBottom: 20,
+    marginBottom: 10,
+    marginTop: 10,
+    fontSize: 17
   },
   modalMsg: {
     color: 'white'
@@ -155,5 +157,14 @@ const styles = StyleSheet.create({
   loading: {
     color: 'white',
     fontSize: 50,
+  },
+  noPLaylsitsContainer: {
+    alignItems: 'center',
+    borderColor: 'white',
+  },
+  noPLaylsitsMsg: {
+    color: 'white',
+    fontSize: 18,
+    margin: 5
   }
 });

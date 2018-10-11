@@ -9,7 +9,8 @@ export default class PlaylistModal extends Component {
       modalVisible: false,
       playlist: props.playlist,
       handleLike: props.handleLike,
-      hasVotedOnPlaylist: false
+      hasVotedOnPlaylist: false,
+      currentUser: props.currentUser
     };
   }
   setModalVisible(visible) {
@@ -57,7 +58,7 @@ export default class PlaylistModal extends Component {
               <View>
                 <Image style={styles.userImg}
                   source={{ uri: this.state.playlist.profile.avatar_url }} />
-                <Text style={styles.votesTitleA}>{this.state.playlist.profile.username}</Text>
+                {!this.state.currentUser.username === this.state.playlist.profile.username ? <Text style={styles.votesTitleA}>{this.state.playlist.profile.username}</Text> : <Text style={styles.votesTitleA}>You</Text>}
               </View>
               <View style={styles.playlistContainer}>
                 {this.state.playlist.tracks.map(track => {
@@ -70,7 +71,7 @@ export default class PlaylistModal extends Component {
                 })}
               </View>
             </ScrollView>
-            <View>
+            {!this.state.currentUser.username === this.state.playlist.profile.username && <View>
               {!this.state.hasVotedOnPlaylist ? <TouchableHighlight style={styles.upVoteButton} onPress={() => this.votePlaylist()}>
                 <Text style={styles.upVote}>I like this playlist</Text>
               </TouchableHighlight> : <View style={styles.alreadyVotedContainer}>
@@ -79,7 +80,7 @@ export default class PlaylistModal extends Component {
                   </Text>
                 </View>
               }
-            </View>
+            </View>}
             <View >
               <TouchableHighlight
                 onPress={() => {
@@ -117,6 +118,7 @@ const styles = StyleSheet.create({
     marginBottom: 7,
     alignSelf: 'center',
     fontWeight: 'bold',
+    textAlign: 'center'
   },
   votesTitle: {
     color: 'grey',
@@ -133,6 +135,13 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 10,
     alignSelf: 'center',
+    borderColor: 'white',
+    borderWidth: 2,
+    borderRadius: 10,
+    fontSize: 17,
+    marginTop: 10,
+    paddingHorizontal: 5,
+    paddingVertical: 3,
   },
   modalMsg: {
     color: 'white',
